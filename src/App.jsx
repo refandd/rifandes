@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { supabase } from './supabaseClient';
 
 // Import Components
 import SplashCursor from './components/SplashCursor';
@@ -127,7 +128,40 @@ export default function App() {
               padding: '20px', border: '1px solid rgba(255,255,255,0.1)', width: '100%', maxWidth: '600px',
               boxShadow: `0 20px 50px rgba(0,0,0,0.5), 0 0 30px ${formData.warna}30`
             }}>
-              <Stepper initialStep={1} onFinalStepCompleted={() => setIsSubmitted(true)} backButtonText="Kembali" nextButtonText="Lanjut">
+              
+              {/* PERHATIKAN BAGIAN INI: Fungsi Supabase dimasukkan ke dalam Stepper utama */}
+              <Stepper 
+                initialStep={1} 
+                backButtonText="Kembali" 
+                nextButtonText="Lanjut"
+                onFinalStepCompleted={async () => {
+                  // Fungsi buat kirim data ke Supabase
+                  const { data, error } = await supabase
+                    .from('profil_users')
+                    .insert([
+                      { 
+                        nama: formData.nama,
+                        gender: formData.gender,
+                        gol_darah: formData.golDarah,
+                        provinsi: formData.provinsi,
+                        kota: formData.kota,
+                        kecamatan: formData.kecamatan,
+                        tanggal_lahir: formData.tanggalLahir,
+                        telepon: formData.telepon,
+                        hobi: formData.hobi,
+                        warna: formData.warna
+                      },
+                    ]);
+
+                  if (error) {
+                    alert("Gagal simpan data: " + error.message);
+                    console.error(error);
+                  } else {
+                    alert("Data berhasil masuk Matrix!");
+                    setIsSubmitted(true); // Layar hasil profil muncul
+                  }
+                }}
+              >
                 
                 {/* STEP 1: IDENTITAS DASAR */}
                 <Step>
